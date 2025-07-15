@@ -1,0 +1,49 @@
+stages:
+  - check
+  - build-images
+
+.build-image:
+  stage: build-images
+  image: alexshcdr/uutils-coreutils-buildroot
+  variables:
+    GIT_SUBMODULE_STRATEGY: normal
+    CACHE_DIR: $CI_PROJECT_NAME
+  before_script:
+    - mkdir -p "$CACHE_DIR"
+    - export BR2_DL_DIR="$PWD/$CACHE_DIR"
+  artifacts:
+    name: "${CI_JOB_NAME}-${CI_COMMIT_SHORT_SHA}"
+    expire_in: 1 days
+    paths:
+      - images.tar.gz
+  cache:
+    key: $CI_PROJECT_NAME
+    paths:
+      - $CACHE_DIR
+  tags:
+    - docker
+
+check-package:
+  stage: check
+  image: alexshcdr/uutils-coreutils-check-package
+  variables:
+    GIT_SUBMODULE_STRATEGY: normal
+  script:
+    - ./buildroot/utils/check-package ./buildroot/package/helix/*
+  tags:
+    - docker
+
+qemu-aarch64:
+  extends: .build-image
+  script:
+    - ./build-img.sh qemu_aarch64_virt_defconfig
+
+raspberry-pi3:
+  extends: .build-image
+  script:
+    - ./build-img.sh raspberrypi3_defconfig
+
+orange-pi-zero2:
+  extends: .build-image
+  script:
+    - ./build-img.sh orangepi_zero2w_defconfig
