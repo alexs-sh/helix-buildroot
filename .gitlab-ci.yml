@@ -38,6 +38,11 @@ qemu-aarch64:
   script:
     - ./build-img.sh qemu_aarch64_virt_defconfig
 
+qemu-aarch64-debug:
+  extends: .build-image
+  script:
+    - ./build-img.sh qemu_aarch64_virt_defconfig debug
+
 raspberry-pi3:
   extends: .build-image
   script:
