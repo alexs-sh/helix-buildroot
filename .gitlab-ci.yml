@@ -1,6 +1,7 @@
 stages:
   - check
   - build-images
+  - build-package
 
 .build-image:
   stage: build-images
@@ -52,3 +53,19 @@ orange-pi-zero2:
   extends: .build-image
   script:
     - ./build-img.sh orangepi_zero2w_defconfig
+
+check-toolchains:
+  extends: .build-image
+  stage: build-package
+  needs: ["check-package"]
+  script:
+    - ./test-pkg.sh
+
+check-toolchains-all:
+  extends: .build-image
+  stage: build-package
+  when: manual
+  allow_failure: true
+  needs: ["check-package"]
+  script:
+    - ./test-pkg.sh all
